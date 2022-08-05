@@ -17,12 +17,11 @@ def proc_consensus_vcf_for_mt(in_vcf, out_vcf):
     vcf_reader = vcf.Reader(open(in_vcf, 'r'))
 
     # update vcf meta infos
+    print(help(vcf.parser._Info))
     vcf_reader.infos['t_ref_counts'] = vcf.parser._Info(    
-        't_ref_count', 1, 'Float', 'Number of reference reads',
-        None, None)
+        't_ref_count', 1, 'Float', 'Number of reference reads', None, None)
     vcf_reader.infos['t_alt_counts'] = vcf.parser._Info(    
-        't_alt_count', 1, 'Float', 'Number of alternate/variant reads',
-        None, None)
+        't_alt_count', 1, 'Float', 'Number of alternate/variant reads', None, None)
     
     # init vcf writer after meta info update
     vcf_writer = vcf.Writer(open(out_vcf, 'w'), vcf_reader)

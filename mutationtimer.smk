@@ -2,8 +2,7 @@ import os
 
 rule all:
     input:
-        os.path.join(config['results_dir'], config['sample_id'] + '.formt.vcf'),
-        os.path.join(config['results_dir'], config['sample_id'] + '.formt.cn.tsv')
+        os.path.join(config['results_dir'], config['sample_id'] + '.pdf')
 
 rule maf_to_vcf:
     input:
@@ -30,8 +29,10 @@ rule proc_vcf_for_mt:
         os.path.join(config['results_dir'], config['sample_id'] + '.formt.vcf')
     log:
         os.path.join(config['log_dir'], config['sample_id'] + '.formt.vcf.log')
+    singularity: 
+        "docker://soymintc/clickpdvcf:latest"
     shell:
-        'python proc_consensus_vcf_for_mt.py '
+        'python scripts/proc_consensus_vcf_for_mt.py '
         '--in_vcf {input} --out_vcf {output} &> {log}'
 
 rule proc_remixtpp_for_mt:
@@ -43,8 +44,26 @@ rule proc_remixtpp_for_mt:
         os.path.join(config['log_dir'], config['sample_id'] + '.formt.cn.tsv.log')
     params:
         bin_size = int(5e7)
+    singularity: 
+        "docker://soymintc/clickpdvcf:latest"
     shell:
-        'python proc_remixtpp_for_mt.py '
+        'python scripts/proc_remixtpp_for_mt.py '
         '--in_pp {input} --out_cn {output} --bin_size {params.bin_size} '
         '&> {log}'
 
+rule mutationtimer:
+    input:
+        vcf=os.path.join(config['results_dir'], config['sample_id'] + '.formt.vcf'),
+        cn=os.path.join(config['results_dir'], config['sample_id'] + '.formt.cn.tsv')
+    output:
+        os.path.join(config['results_dir'], config['sample_id'] + '.pdf')
+    log:
+        os.path.join(config['log_dir'], config['sample_id'] + '.pdf.log')
+    params:
+        clonal_freq = 0.54 # TODO: soft code
+    singularity: 
+        "docker://soymintc/mutationtimer:latest"
+    shell:
+        'Rscript scripts/run_mutationtimer.R '
+        '{input.vcf} {input.cn} {params.clonal_freq} {output} '
+        '&> {log}'

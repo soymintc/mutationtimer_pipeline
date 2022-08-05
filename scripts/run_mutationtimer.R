@@ -1,33 +1,5 @@
-## Test out transforming cn to bb
-#cn_path = '/work/shah/users/chois7/retreat/test/OV-081/results/OV-081.cn.smooth.tsv'
-#cn = read.table(cn_path, header=1)
-#ov_bb <- GRanges(
-#  seqnames = Rle( as.character(cn$chromosome) ),
-#  ranges = IRanges(
-#    as.numeric(cn$start),
-#    end = as.numeric(cn$end)
-#  ),
-#  major_cn = as.integer(cn$major_1),
-#  minor_cn = as.integer(cn$minor_1),
-#  clonal_frequency = rep(0.54, dim(cn)[1]), # TODO
-#)
-
-#ov_vcf_path = '/work/shah/users/chois7/retreat/test/OV-081/results/OV-081.addi.vcf'
-#ov_vcf = readVcf(ov_vcf_path)
-
-#ov_mt = mutationTime(ov_vcf, ov_bb, n.boot=10)
-
-#ov_vcf <- addMutTime(ov_vcf, ov_mt$V)
-
-#mcols(ov_bb) <- cbind(mcols(ov_bb), ov_mt$T)
-
-#pdf('/work/shah/users/chois7/retreat/test/OV-081/results/OV-081.pdf', 
-#    width=10, height=8)
-#plotSample(ov_vcf, ov_bb)
-#dev.off()
-
-
 library(argparse)
+library(MutationTimeR)
 
 readCnTable <- function(cn_path, clonal_freq) {
     cn = read.table(cn_path, header=1)
@@ -39,7 +11,7 @@ readCnTable <- function(cn_path, clonal_freq) {
       ),
       major_cn = as.integer(cn$major_1),
       minor_cn = as.integer(cn$minor_1),
-      clonal_frequency = rep(0.54, dim(cn)[1]), # TODO
+      clonal_frequency = rep(clonal_freq, dim(cn)[1]), # TODO: soft code
     )
     return(bb)
 }
@@ -65,17 +37,14 @@ main <- function() {
     clonal_freq <- as.numeric(argv$cf)
 
     # run MutationTimeR functions
-    library(MutationTimeR)
     mt = mutationTime(vcf, bb, n.boot=10) # TODO: clonality
     vcf <- addMutTime(vcf, mt$V)
     mcols(bb) <- cbind(mcols(bb), mt$T)
     
     # plot output
     pdf(argv$pdf, height=8, width=10, useDingbats = FALSE)
-    plotSample(ov_vcf, ov_bb)
+    plotSample(vcf, bb)
     dev.off()
 }
 
 main()
-
-
