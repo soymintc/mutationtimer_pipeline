@@ -32,6 +32,7 @@ cmd="$cmd --cluster-config $cluster_yaml"
 cmd="$cmd --cluster \"${CLUSTER_CMD}\""
 cmd="$cmd --cluster-cancel bkill"
 cmd="$cmd --snakefile mutationtimer.smk"
-cmd="$cmd --rerun-incomplete --dry-run" #--dag
+cmd="$cmd --rerun-incomplete" #--dry-run" #--dag
 
 echo $cmd
+eval $cmd
