@@ -1,0 +1,9 @@
+# docker build -f dockerfile_clickpdvcf -t soymintc/clickpdvcf .
+# docker push soymintc/clickpdvcf
+
+FROM --platform=linux/amd64 python:3.7
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir click pandas
+RUN pip install PyVCF3==1.0.0
+
