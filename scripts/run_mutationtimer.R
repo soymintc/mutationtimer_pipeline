@@ -1,4 +1,3 @@
-library(MutationTimeR)
 
 ## Test out transforming cn to bb
 #cn_path = '/work/shah/users/chois7/retreat/test/OV-081/results/OV-081.cn.smooth.tsv'
@@ -65,6 +64,7 @@ main <- function() {
     clonal_freq <- as.numeric(argv$cf)
 
     # run MutationTimeR functions
+    library(MutationTimeR)
     mt = mutationTime(vcf, bb, n.boot=10) # TODO: clonality
     vcf <- addMutTime(vcf, mt$V)
     mcols(bb) <- cbind(mcols(bb), mt$T)
