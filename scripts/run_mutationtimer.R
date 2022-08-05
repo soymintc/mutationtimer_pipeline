@@ -33,8 +33,8 @@ main <- function() {
     argv <- get_args()
 
     vcf <- readVcf(argv$vcf) # vcf path
-    bb <- readCnTable(argv$cn) # cn_path
     clonal_freq <- as.numeric(argv$cf)
+    bb <- readCnTable(argv$cn, clonal_freq) # cn_path
 
     # run MutationTimeR functions
     mt = mutationTime(vcf, bb, n.boot=10) # TODO: clonality
