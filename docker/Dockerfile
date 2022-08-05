@@ -1,0 +1,15 @@
+FROM rocker/r-ver:4.1.2
+
+RUN apt-get update
+
+# for R install
+RUN apt-get install -y libcurl4-openssl-dev libssl-dev libssh2-1-dev libxml2-dev zlib1g-dev curl
+
+# for Rhtslib
+RUN apt-get install -y libbz2-dev liblzma-dev 
+
+RUN R -e "install.packages(c('devtools', 'testthat', 'roxygen2', 'BiocManager'))" && \
+    R -e "devtools::install_github('mg14/mg14')" && \
+    R -e "BiocManager::install('VariantAnnotation')" && \
+    R -e "devtools::install_github('gerstung-lab/MutationTimeR')" && \
+    R -e "install.packages(c('argparse'))"
