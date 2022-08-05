@@ -1,4 +1,3 @@
-
 ## Test out transforming cn to bb
 #cn_path = '/work/shah/users/chois7/retreat/test/OV-081/results/OV-081.cn.smooth.tsv'
 #cn = read.table(cn_path, header=1)
@@ -28,6 +27,8 @@
 #dev.off()
 
 
+library(argparse)
+
 readCnTable <- function(cn_path, clonal_freq) {
     cn = read.table(cn_path, header=1)
     bb <- GRanges( # bb file formated for MutationTimeR
@@ -40,7 +41,7 @@ readCnTable <- function(cn_path, clonal_freq) {
       minor_cn = as.integer(cn$minor_1),
       clonal_frequency = rep(0.54, dim(cn)[1]), # TODO
     )
-    return bb
+    return(bb)
 }
 
 get_args <- function() {
