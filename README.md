@@ -21,4 +21,4 @@ bash run_snakemake.sh $out_dir $sample_id
 1. Create an `$out_dir` for running `run_snakemake.sh`.
 2. Make sure that the `$sample_id` input for `run_snakemake.sh` is exact with the Isabl sample ID included in the metadata file.
 3. For first-time runs I recommend running `run_snakemake.sh` with `--dry-run`.
-4. Let @soymintc know of any inconveniences :yum: and relax :beers:
+4. Let [Seongmin] (https://www.github.com/soymintc) know of any inconveniences :yum: and relax :beers:
