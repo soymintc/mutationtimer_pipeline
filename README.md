@@ -1,5 +1,6 @@
 # MutationTimeR pipeline
-A wrapper pipeline for running MutationTimeR with Isabl consensus somatic maf and RemiXT post-processed csv
+A wrapper pipeline for running MutationTimeR with Isabl consensus somatic maf and RemiXT post-processed csv.
+Welcome to the `link_isabl` branch; adding isabl metadata to the pipeline. :construction_worker:
 `TODO`: add more docs
 
 ## Install
@@ -9,7 +10,7 @@ git clone git@github.com:soymintc/mutationtimer_pipeline.git
 ```
 
 ## Example
-At least running the following code will result in a successful run with `${out_dir}/results/${sample_id}.pdf` as an output
+At least running the following code will result in a successful run with `${out_dir}/results/${sample_id}.pdf` as an output.
 ```
 out_dir=./analyses
 sample_id=OV-081
