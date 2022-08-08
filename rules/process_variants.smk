@@ -10,11 +10,15 @@ def get_remixtpp_input_paths(wildcards):
         'remixt_cn': runinfo.paths[(wildcards.sample, 'WGS-REMIXT-POSTPROCESS', 'remixt_cn')],
     }
 
-rule filter_vcf:
+rule filter_maf:
     input: unpack(get_maf_input_paths)
     output: os.path.join(config['intermediate_dir'], '{sample}_filtered.maf'),
-    #singularity: "docker://amcpherson/mmctm-pythonscripts:v0.1"
-    shell: 'python scripts/filter_maf.py {input.consensus_somatic_maf} {output}'
+    log: os.path.join(config['log_dir'], '{sample}_filtered.maf.log'),
+    singularity: "docker://soymintc/clickpdvcf:latest"
+    shell: 
+        'python scripts/filter_maf.py '
+        '--in_maf {input.consensus_somatic_maf} --out_maf {output} '
+        '&> {log}'
 
 rule maf_to_vcf:
     input:
