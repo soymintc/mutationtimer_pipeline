@@ -3,7 +3,7 @@ A wrapper pipeline for running MutationTimeR with Isabl consensus somatic maf an
 
 ## Branches
 - `main`: :snowflake: freeze with one running example; will remain as is for a while for the sake of testing
-- `link_isabl`: :zap: linking isabl WGS-SOMATICCALLING and WGS-REMIST-POSTPROCESS metadata to the pipeline
+- `link_isabl`: :snowflake: freeze pipeline with inputs as Isabl sample IDs for WGS-SOMATICCALLING and WGS-REMIST-POSTPROCESS (no `maf`, no `remixtpp`, no fuss)
 - :art: : feel free to add any branches, or to fork and add branches of your own!
 
 ## Install
