@@ -21,9 +21,9 @@ rule maf_to_vcf:
         maf = os.path.join(config['intermediate_dir'], '{sample}_filtered.maf'),
         ref = '/juno/work/shah/mondrian/pipelines/mutect/reference/vep/homo_sapiens/99_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz' # TODO: soft code
     output:
-        os.path.join(config['intermediate_dir'], '{sample}.vcf')
+        os.path.join(config['intermediate_dir'], '{sample}_filtered.vcf')
     log:
-        os.path.join(config['log_dir'], '{sample}.vcf.log')
+        os.path.join(config['log_dir'], '{sample}_filtered.vcf.log')
     params:
         outdir = config['results_dir']
     singularity: '/home/chois7/chois7/singularity/sif/var.sif' # TODO: soft code
@@ -36,11 +36,11 @@ rule maf_to_vcf:
 
 rule proc_vcf_for_mt:
     input:
-        os.path.join(config['intermediate_dir'], '{sample}.vcf')
+        os.path.join(config['intermediate_dir'], '{sample}_filtered.vcf')
     output:
-        os.path.join(config['results_dir'], '{sample}.formt.vcf')
+        os.path.join(config['results_dir'], '{sample}.vcf')
     log:
-        os.path.join(config['log_dir'], '{sample}.formt.vcf.log')
+        os.path.join(config['log_dir'], '{sample}.vcf.log')
     singularity: 
         "docker://soymintc/clickpdvcf:latest"
     shell:
@@ -52,9 +52,9 @@ rule proc_remixtpp_for_mt:
         unpack(get_remixtpp_input_paths)
         #remixtpp = config['remixtpp']
     output:
-        os.path.join(config['results_dir'], '{sample}.formt.cn.tsv')
+        os.path.join(config['results_dir'], '{sample}.cn.tsv')
     log:
-        os.path.join(config['log_dir'], '{sample}.formt.cn.tsv.log')
+        os.path.join(config['log_dir'], '{sample}.cn.tsv.log')
     params:
         bin_size = int(5e7)
     singularity: 

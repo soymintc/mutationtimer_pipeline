@@ -2,7 +2,7 @@ import os
 
 class RunInfo:
     def __init__(self, config):
-        self.metadata = pd.read_csv(config['results_paths'])
+        self.metadata = pd.read_csv(config['metadata'])
         sample_ids = set(self.metadata.query('sample_category == "TUMOR"')['isabl_sample_id'].unique())
         self.metadata = self.metadata[self.metadata['isabl_application'].isin(['WGS-SOMATICCALLING', 'WGS-REMIXT-POSTPROCESS'])]
         for app in self.metadata['isabl_application'].unique():

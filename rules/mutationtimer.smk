@@ -1,7 +1,7 @@
 rule mutationtimer:
     input:
-        vcf=os.path.join(config['results_dir'], '{sample}.formt.vcf'),
-        cn=os.path.join(config['results_dir'], '{sample}.formt.cn.tsv')
+        vcf=os.path.join(config['results_dir'], '{sample}.vcf'),
+        cn=os.path.join(config['results_dir'], '{sample}.cn.tsv')
     output:
         os.path.join(config['results_dir'], '{sample}.pdf')
     log:
