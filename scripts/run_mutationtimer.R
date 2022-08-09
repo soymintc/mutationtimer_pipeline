@@ -24,6 +24,7 @@ get_args <- function() {
     p$add_argument("cf", help = "Clonal frequency")
 
     p$add_argument("pdf", help = "output plot pdf")
+    p$add_argument("rdata", help = "output workspace RData")
 
     return(p$parse_args())
 }
@@ -33,7 +34,7 @@ main <- function() {
     argv <- get_args()
 
     vcf <- readVcf(argv$vcf) # vcf path
-    clonal_freq <- as.numeric(argv$cf)
+    clonal_freq <- as.numeric(argv$cf) # purity
     bb <- readCnTable(argv$cn, clonal_freq) # cn_path
 
     # run MutationTimeR functions
@@ -41,6 +42,9 @@ main <- function() {
     vcf <- addMutTime(vcf, mt$V)
     mcols(bb) <- cbind(mcols(bb), mt$T)
     
+    # save RData
+    save.image(file=argv$rdata)
+
     # plot output
     pdf(argv$pdf, height=8, width=10, useDingbats = FALSE)
     plotSample(vcf, bb)
