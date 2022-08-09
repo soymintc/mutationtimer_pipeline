@@ -1,11 +1,11 @@
 rule mutationtimer:
     input:
-        vcf=os.path.join(config['results_dir'], '{sample}.vcf'),
-        cn=os.path.join(config['results_dir'], '{sample}.cn.tsv')
+        vcf=os.path.join(config['results_dir'], '{aliquot_id}.vcf'),
+        cn=os.path.join(config['results_dir'], '{aliquot_id}.cn.tsv')
     output:
-        os.path.join(config['results_dir'], '{sample}.pdf')
+        os.path.join(config['results_dir'], '{aliquot_id}.pdf')
     log:
-        os.path.join(config['log_dir'], '{sample}.pdf.log')
+        os.path.join(config['log_dir'], '{aliquot_id}.pdf.log')
     params:
         clonal_freq = 0.54 # TODO: soft code
     singularity: 
