@@ -43,7 +43,8 @@ main <- function() {
     mcols(bb) <- cbind(mcols(bb), mt$T)
     
     # save RData
-    save.image(file=argv$rdata)
+    save(list = ls(all.names = TRUE), file=argv$rdata, 
+         envir = environment())
 
     # plot output
     pdf(argv$pdf, height=8, width=10, useDingbats = FALSE)
