@@ -17,8 +17,10 @@ rule parse_purity:
         aliquot_and_purity = aliquot_and_purity.sort_values(
             by=['tumour_proportion', 'tumor_aliquot_id'], 
             ascending=False) # if duplicate aliquots with both tumour_proportion and NA, use tumour_proportion values instead of NA
-        aliquot_to_purity = {x[0]: x[1] for x in aliquot_and_purity.values}        
-        purity = aliquot_to_purity[wildcards.aliquot_id]
+        aliquot_to_purity = {x[0]: x[1] for x in aliquot_and_purity.values}
+        purity = 'NA'
+        if wildcards.aliquot_id in aliquot_to_purity:
+            purity = aliquot_to_purity[wildcards.aliquot_id]
         purity = 0.5 if purity == 'NA' else purity # ad hoc replacement to 0.5 if NA
         with open(output[0], 'w') as outfile:
             outfile.write(f'{purity}\n')
