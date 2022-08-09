@@ -11,7 +11,7 @@ readCnTable <- function(cn_path, clonal_freq) {
       ),
       major_cn = as.integer(cn$major_1),
       minor_cn = as.integer(cn$minor_1),
-      clonal_frequency = rep(clonal_freq, dim(cn)[1]), # TODO: soft code
+      clonal_frequency = rep(clonal_freq, dim(cn)[1]), 
     )
     return(bb)
 }
