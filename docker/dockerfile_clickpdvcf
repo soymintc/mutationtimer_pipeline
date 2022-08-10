@@ -1,5 +1,5 @@
-# docker build -f dockerfile_clickpdvcf -t soymintc/clickpdvcf .
-# docker push soymintc/clickpdvcf
+# docker build -f dockerfile_clickpdvcf -t soymintc/clickpdvcf:0.0.2 .
+# docker push soymintc/clickpdvcf:0.0.2
 
 FROM --platform=linux/amd64 python:3.7
 
