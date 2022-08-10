@@ -1,17 +1,18 @@
 # MutationTimeR pipeline
 A wrapper pipeline for running MutationTimeR with Isabl consensus somatic maf and ReMixT post-processed csv.
-Welcome to the `link_isabl` branch; adding isabl metadata to the pipeline. :construction_worker:
+Welcome to the `link_isabl` branch; added isabl metadata and ReMixT post-processing spreadsheet into the pipeline. :construction_worker:
 
 ## Install
 Cloning the directory is enough. However, you need to provide an accurate Isabl aliquot ID. See example in the next section.
 ```
 git clone git@github.com:soymintc/mutationtimer_pipeline.git
+git checkout link_isabl  # main is a freeze of the most primitive working version!
 ```
 
 ## Example
 At least running the following code will result in a successful run with `${out_dir}/results/${aliquot_id}.pdf` as an output.
 ```
-out_dir=./analysis  # you need write privilege
+out_dir=/path/to/out/dir  # you need write privilege
 aliquot_id=SPECTRUM-OV-081_S1_LEFT_OVARY  # matching Isabl aliquot ID
 
 bash run_snakemake.sh $out_dir $aliquot_id

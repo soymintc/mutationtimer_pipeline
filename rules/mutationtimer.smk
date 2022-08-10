@@ -6,7 +6,7 @@ rule parse_purity:
     output:
         os.path.join(config['results_dir'], '{aliquot_id}.purity.txt')
     run:
-        sheet_id = "1yZ0UYDm5JuY1FqBLImHjdHeBK6_6EfGpGwyb2X030NM"
+        sheet_id = "1yZ0UYDm5JuY1FqBLImHjdHeBK6_6EfGpGwyb2X030NM" # TODO: include in config for info safety
         sheet_name = "main"
         url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/edit#gid=0&sheet={sheet_name}"
         url = url.replace('/edit#gid=', '/export?format=csv&gid=')
