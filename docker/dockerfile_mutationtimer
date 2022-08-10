@@ -1,5 +1,5 @@
 # docker build -f dockerfile_mutationtimer -t somyintc/mutationtimer
-# docker build soymintc/mutationtimer
+# docker push soymintc/mutationtimer
 
 FROM rocker/r-ver:4.1.2
 
