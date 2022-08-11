@@ -14,7 +14,7 @@ rule filter_maf:
     input: unpack(get_maf_input_paths)
     output: os.path.join(config['intermediate_dir'], '{aliquot_id}_filtered.maf'),
     log: os.path.join(config['log_dir'], '{aliquot_id}_filtered.maf.log'),
-    singularity: "docker://soymintc/clickpdvcf:latest"
+    singularity: "docker://soymintc/clickpdvcf:0.0.2"
     shell: 
         'python scripts/filter_maf.py '
         '--in_maf {input.consensus_somatic_maf} --out_maf {output} '
@@ -46,7 +46,7 @@ rule proc_vcf_for_mt:
     log:
         os.path.join(config['log_dir'], '{aliquot_id}.vcf.log')
     singularity: 
-        "docker://soymintc/clickpdvcf:latest"
+        "docker://soymintc/clickpdvcf:0.0.2"
     shell:
         'python scripts/proc_consensus_vcf_for_mt.py '
         '--in_vcf {input} --out_vcf {output} &> {log}'
@@ -59,12 +59,10 @@ rule proc_remixtpp_for_mt:
         os.path.join(config['results_dir'], '{aliquot_id}.cn.tsv')
     log:
         os.path.join(config['log_dir'], '{aliquot_id}.cn.tsv.log')
-    params:
-        bin_size = int(5e7)
     singularity: 
-        "docker://soymintc/clickpdvcf:latest"
+        "docker://soymintc/clickpdvcf:0.0.2"
     shell:
         'python scripts/proc_remixtpp_for_mt.py '
-        '--in_pp {input.remixt_cn} --out_cn {output} --bin_size {params.bin_size} '
+        '--in_pp {input.remixt_cn} --out_cn {output} '
         '&> {log}'
 
