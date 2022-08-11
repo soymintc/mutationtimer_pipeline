@@ -36,6 +36,8 @@ def filter_maf(in_maf, out_maf):
     logging.debug(f'maf shape after n_depth filter: {maf.shape}')
     maf = maf[maf['n_ref_count'] > 3] # Normal_count > 3
     logging.debug(f'maf shape after n_ref_count filter: {maf.shape}')
+    maf = maf[maf['n_alt_count'] == 0] # remove all possible germlines
+    logging.debug(f'maf shape after n_alt_count filter: {maf.shape}')
     maf = maf[maf['AF'] < 0.01] # AF-filter # Gnomad_allele_frequency[‘non_cancer_AF_popmax’]  < .01
     logging.debug(f'maf shape after AF filter: {maf.shape}')
 
