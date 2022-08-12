@@ -47,24 +47,24 @@ main <- function() {
 
     vcf <- readVcf(argv$vcf) # vcf path
     clonal_freq <- as.numeric(argv$cf) # purity
-    ploidy <- as.numeric(argv$ploidy)
+    ploidy <- as.numeric(argv$ploidy) # ploidy
     bb <- readCnTable(argv$cn, clonal_freq) # cn_path
     
     # get WGD status
-    hom = averageHom(bb)
-    isWgd = .classWgd(ploidy, hom) # ploidy
+    hom <- averageHom(bb)
+    isWgd <- .classWgd(ploidy, hom)
 
     # run MutationTimeR functions
-    mt = mutationTime(vcf, bb, isWgd=isWgd, n.boot=10) # TODO: add cluster
+    mt <- mutationTime(vcf, bb, isWgd=isWgd, n.boot=10) # TODO: add cluster
     vcf <- addMutTime(vcf, mt$V)
     mcols(bb) <- cbind(mcols(bb), mt$T)
     
     # save RData
-    save(list = ls(all.names = TRUE), file=argv$rdata, 
-         envir = environment())
+    save(list=ls(all.names=TRUE), file=argv$rdata, 
+         envir=environment())
 
     # plot output
-    pdf(argv$pdf, height=8, width=10, useDingbats = FALSE)
+    pdf(argv$pdf, height=8, width=10, useDingbats=FALSE)
     plotSample(vcf, bb)
     dev.off()
 }
