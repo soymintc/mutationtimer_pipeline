@@ -8,7 +8,6 @@ A wrapper pipeline for running MutationTimeR with Isabl consensus somatic maf an
 Cloning the directory is enough. However, you need to provide an accurate Isabl aliquot ID. See example in the next section.
 ```
 git clone git@github.com:soymintc/mutationtimer_pipeline.git
-git checkout link_isabl  # main is a freeze of the most primitive working version!
 ```
 
 ## Example

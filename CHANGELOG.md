@@ -9,3 +9,6 @@
 - purity and ploidy parsing from Remixt Post-Processing google spreadsheet
 - updated dockerfile to include scipy
 - calculate `isWgd` parameter for MutationTimeR
+
+## 0.0.3
+- added a more stringent germline filter of `n_alt_count` == 0
