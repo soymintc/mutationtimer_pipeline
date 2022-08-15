@@ -14,15 +14,19 @@ def update_blocks_and_reset_prev(blocks, prev, row,
 def get_blocks_from_remixt_pp(in_pp):
     #in_pp = '/juno/work/shah/isabl_data_lake/analyses/37/74/23774/SPECTRUM-OV-081_S1_LEFT_OVARY_cn.csv'
     remixt = pd.read_table(in_pp, dtype=str, low_memory=False)
-    gaussian_filter_sigma = 50
+    gaussian_filter_sigma = 30
 
     features = ['chromosome', 'start', 'end', 'major_1', 'minor_1']
     remixt = remixt[features] # reduce features for the sake of memory
 
     # smoothen major_1 and minor_1
     for f in ['major_1', 'minor_1']:
-        remixt[f] = scipy.ndimage.gaussian_filter(
-                remixt[f].astype(int), gaussian_filter_sigma)
+        remixt[f] = (scipy.ndimage.gaussian_filter(
+                    remixt[f].astype(float), gaussian_filter_sigma
+                )
+                .round()
+                .astype(int)
+            )
     major_smaller_than_minor = (remixt['major_1'] < remixt['minor_1'])
     remixt.loc[ major_smaller_than_minor, 'major_1' ] = remixt.loc[ major_smaller_than_minor, 'minor_1' ]
 

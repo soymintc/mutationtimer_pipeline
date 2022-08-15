@@ -48,11 +48,17 @@ main <- function() {
     vcf <- readVcf(argv$vcf) # vcf path
     clonal_freq <- as.numeric(argv$cf) # purity
     ploidy <- as.numeric(argv$ploidy) # ploidy
+    print("[LOG] ploidy") 
+    print(ploidy)
     bb <- readCnTable(argv$cn, clonal_freq) # cn_path
     
     # get WGD status
     hom <- averageHom(bb)
+    print("[LOG] hom")
+    print(hom) ##@##
     isWgd <- .classWgd(ploidy, hom)
+    print("[LOG] isWgd")
+    print(isWgd)
 
     # run MutationTimeR functions
     mt <- mutationTime(vcf, bb, isWgd=isWgd, n.boot=10) # TODO: add cluster
