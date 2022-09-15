@@ -36,14 +36,14 @@ def filter_blacklist(snvs, blacklist):
     ok_idx = []
     for chrom in snvs['chrom'].unique():
         chrom_snvs = snvs[snvs['chrom'] == chrom]
-        chrom_blacklist = blacklist[blacklist['chr'] == ('chr' + chrom)]
+        chrom_blacklist = blacklist[blacklist['chromosome'] == ('chr' + chrom)]
         try:
             is_low_mapp = in_any_region(chrom_snvs['coord'], chrom_blacklist)
         except IndexError:
-            print(chrom_snvs['coord'])
-            print(chrom_snvs['coord'].shape)
-            print(chrom_blacklist)
-            print(chrom_blacklist.shape)
+            print("chrom_snvs['coord']", chrom_snvs['coord'])
+            print("chrom_snvs['coord'].shape", chrom_snvs['coord'].shape)
+            print("chrom_blacklist", chrom_blacklist)
+            print("chrom_blacklist.shape", chrom_blacklist.shape)
         ok_idx.extend(chrom_snvs.index[~is_low_mapp])
 
     return snvs.loc[ok_idx]
