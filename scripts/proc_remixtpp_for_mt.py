@@ -1,6 +1,7 @@
 import click
 import pandas as pd
 from pandas.api.types import CategoricalDtype
+import scipy.ndimage
 
 def update_blocks_and_reset_prev(blocks, prev, row, 
         features=['chromosome', 'start', 'end', 'major_1', 'minor_1']):
@@ -10,18 +11,30 @@ def update_blocks_and_reset_prev(blocks, prev, row,
     return blocks, prev
 
 
-
 def get_blocks_from_remixt_pp(in_pp):
     #in_pp = '/juno/work/shah/isabl_data_lake/analyses/37/74/23774/SPECTRUM-OV-081_S1_LEFT_OVARY_cn.csv'
-    pp = pd.read_table(in_pp, dtype=str, low_memory=False)
+    remixt = pd.read_table(in_pp, dtype=str, low_memory=False)
+    gaussian_filter_sigma = 30
 
     features = ['chromosome', 'start', 'end', 'major_1', 'minor_1']
-    parsed_pp = pp[features]
+    remixt = remixt[features] # reduce features for the sake of memory
 
+    # smoothen major_1 and minor_1
+    for f in ['major_1', 'minor_1']:
+        remixt[f] = (scipy.ndimage.gaussian_filter(
+                    remixt[f].astype(float), gaussian_filter_sigma
+                )
+                .round()
+                .astype(int)
+            )
+    major_smaller_than_minor = (remixt['major_1'] < remixt['minor_1'])
+    remixt.loc[ major_smaller_than_minor, 'major_1' ] = remixt.loc[ major_smaller_than_minor, 'minor_1' ]
+
+    # merge segments with same major_1 and minor_1
     prev = pd.Series({f:None for f in features}, index=features) # init prev cn
     blocks = pd.DataFrame(columns=features) # init empty blocks
 
-    for rix, row in parsed_pp.iterrows():
+    for rix, row in remixt.iterrows():
         if prev['chromosome'] != row['chromosome']:
             blocks, prev = update_blocks_and_reset_prev(blocks, prev, row)
             continue
@@ -36,40 +49,8 @@ def get_blocks_from_remixt_pp(in_pp):
 
     blocks = pd.concat([blocks, prev.to_frame().T]) # add prev
     blocks.loc[:, ['start', 'end', 'major_1', 'minor_1']] = blocks.loc[:, ['start', 'end', 'major_1', 'minor_1']].astype(int)
+    blocks['start'] = blocks['start'] + 1 # so segments don't overlap; w/o this !mixFlag[j] error occurs in MutationTimeR step
     return blocks
-
-
-def get_cn_data_from_blocks(blocks, bin_size=int(5e7)):
-    blocks['start_bin'] = blocks['start'] // bin_size
-    blocks['end_bin'] = blocks['end'] // bin_size
-    major_groups = blocks.groupby(['chromosome', 'start_bin'])['major_1'].mean().astype(int)
-    minor_groups = blocks.groupby(['chromosome', 'start_bin'])['minor_1'].mean().astype(int)
-
-    chroms, start_poss, end_poss, majors, minors = [], [], [], [], []
-    for (chrom, pix), major in major_groups.iteritems():
-        minor = minor_groups[(chrom, pix)]
-        start_pos = bin_size * pix + 1
-        end_pos = bin_size * (pix + 1)
-        chroms.append(chrom)
-        start_poss.append(start_pos)
-        end_poss.append(end_pos)
-        majors.append(major)
-        minors.append(minor)
-    cn_data = pd.DataFrame({
-        'chromosome': chroms,
-        'start': start_poss,
-        'end': end_poss,
-        'major_1': majors,
-        'minor_1': minors,
-    })
-
-    chrom_list = CategoricalDtype(
-        [str(c) for c in range(1, 22+1)] + ['X', 'Y'], 
-        ordered=True
-    )
-    cn_data['chromosome'] = cn_data['chromosome'].astype(chrom_list)
-    cn_data = cn_data.sort_values(by=['chromosome', 'start'])
-    return cn_data
 
 
 @click.command()
@@ -77,11 +58,8 @@ def get_cn_data_from_blocks(blocks, bin_size=int(5e7)):
         help="Input RemiXT PostProcessing tsv")
 @click.option('--out_cn', required=True,
         help="Output cn tsv path")
-@click.option('--bin_size', default=int(5e7), type=int,
-        show_default=True, help="CN bin size")
-def proc_remixtpp_for_mt(in_pp, out_cn, bin_size):
-    blocks = get_blocks_from_remixt_pp(in_pp)
-    cn_data = get_cn_data_from_blocks(blocks, bin_size=bin_size)
+def proc_remixtpp_for_mt(in_pp, out_cn):
+    cn_data = get_blocks_from_remixt_pp(in_pp)
     cn_data.to_csv(out_cn, sep='\t', index=False)
 
 

@@ -1,6 +1,6 @@
-[ $# -ne 2 ] && { echo -e "\nUsage: $0 <base.dir> <sample_id>\n" 1>&2; exit 1; }
+[ $# -ne 2 ] && { echo -e "\nUsage: $0 <base.dir> <aliquot_id>\n" 1>&2; exit 1; }
 indir=$1
-sample_id=$2
+aliquot_id=$2
 
 base_dir=$(realpath $indir)
 [ ! -d $base_dir ] && { echo "LOG: $base_dir does not exist"; mkdir -p $base_dir; }
@@ -22,7 +22,7 @@ cmd="snakemake --config"
 cmd="$cmd results_dir=$results_dir"
 cmd="$cmd intermediate_dir=$intermediate_dir"
 cmd="$cmd log_dir=$log_dir"
-cmd="$cmd sample_id=$sample_id"
+cmd="$cmd aliquot_id=$aliquot_id"
 cmd="$cmd --configfile $pipeline_config"
 cmd="$cmd --jobs 10"
 cmd="$cmd --use-singularity"
