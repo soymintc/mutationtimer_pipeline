@@ -57,10 +57,15 @@ snv = dd.read_csv(snv_path, sep='\t', dtype={'chrom':str, 'coord':'int32', 'ref'
 # get merged snv data
 joint = snv.merge(gt, left_on=varid, right_on=varid, how="inner")
 joint = joint.compute() # dd -> pd
-joint['cluster'] = joint['cell_id'].map(cell_to_clone).dropna()
+joint['cluster'] = joint['cell_id'].map(cell_to_clone).fillna('NA')
 
-cell_ids = joint[varid + ['cell_id', 'cluster']]
-cell_ids['cell_id'] = cell_ids.groupby(['chrom', 'coord', 'ref', 'alt'])['cell_id'].apply(lambda x: ','.join(x))
-cell_ids['cluster'] = cell_ids.groupby(['chrom', 'coord', 'ref', 'alt'])['cluster'].apply(lambda x: ','.join(x))
+cell_and_cluster = joint[varid + ['cell_id', 'cluster']]
+cell_ids = cell_and_cluster.groupby(varid)['cell_id'].apply(lambda x: ','.join(x))
+clusters = cell_and_cluster.groupby(varid)['cluster'].apply(lambda x: ','.join(x))
 
-cell_ids.to_csv(args.output)
+labelled = (cell_and_cluster[varid]
+        .drop_duplicates()
+        .merge(cell_ids, on=varid)
+        .merge(clusters, on=varid))
+
+labelled.to_csv(args.output, sep='\t', index=False)
