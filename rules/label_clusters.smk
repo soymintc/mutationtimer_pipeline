@@ -47,7 +47,7 @@ rule get_clusters: # cluster: clone_id
         "docker://rocker/tidyverse"
     shell:
         'Rscript scripts/get_clone_id.R '
-        '{input} {output}'
+        '{input} {output} &> {log}'
         
 rule label_clusters:
     input:
