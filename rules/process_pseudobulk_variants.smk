@@ -27,11 +27,11 @@ rule filter_pseudobulk_snv:
     input: 
         unpack(_get_scdna_variantcalling)
     output: 
-        os.path.join(config['results_dir'], '{sample}.pseudobulk.csv')
+        os.path.join(config['results_dir'], '{sample}.pseudobulk.tsv')
     params:
         blacklist = '/juno/work/shah/reference/wgs_pipeline/mask_regions_blacklist_crg_align36_table.txt'
     log:
-        os.path.join(config['log_dir'], '{sample}.pseudobulk.csv.log')
+        os.path.join(config['log_dir'], '{sample}.pseudobulk.tsv.log')
     singularity: 
         "docker://soymintc/clickpdvcf:latest"
     shell:

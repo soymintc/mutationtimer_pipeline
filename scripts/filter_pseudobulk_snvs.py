@@ -36,7 +36,7 @@ def filter_blacklist(snvs, blacklist):
     ok_idx = []
     for chrom in snvs['chrom'].unique():
         chrom_snvs = snvs[snvs['chrom'] == chrom]
-        chrom_blacklist = blacklist[blacklist['chromosome'] == ('chr' + chrom)]
+        chrom_blacklist = blacklist[blacklist['chr'] == ('chr' + chrom)]
         try:
             is_low_mapp = in_any_region(chrom_snvs['coord'], chrom_blacklist)
         except IndexError:
@@ -53,19 +53,25 @@ def filter_blacklist(snvs, blacklist):
 def filter_snvs(museq, strelka, mappability, cosmic, dbsnp, snpeff, trinuc,
         blacklist, remove_chr6p):
 
+    print(f"[LOG] museq.shape: {museq.shape}")
     museq = museq.rename(columns={'score': 'museq_score'})
     museq = museq[museq['museq_score'] > 0.9]
+    print(f"[LOG] museq.shape after score filtering: {museq.shape}")
 
-    print(len(museq))
+    print(f"[LOG] museq.shape: {museq.shape}")
     if remove_chr6p:
         is_chr6p = (museq['chrom'] == '6') & (museq['coord'] < 65e5)
         museq = museq[~is_chr6p]
-    print(len(museq))
+    print(f"[LOG] museq.shape after chr6 filtering: {museq.shape}")
 
+    print(f"[LOG] strelka.shape: {strelka.shape}")
     strelka = strelka.rename(columns={'score': 'strelka_score'})
     strelka = strelka[strelka['strelka_score'] > 20.]
+    print(f"[LOG] strelka.shape after chr6 filtering: {strelka.shape}")
 
+    print(f"[LOG] mappability.shape: {mappability.shape}")
     mappability = mappability[mappability['mappability'] > 0.99]
+    print(f"[LOG] mappability.shape after mappability filtering: {mappability.shape}")
 
     cosmic['is_cosmic'] = True
     cosmic = cosmic[[
@@ -86,20 +92,29 @@ def filter_snvs(museq, strelka, mappability, cosmic, dbsnp, snpeff, trinuc,
     ])['value'].unstack(fill_value=0)
     snpeff = snpeff.rename(columns=str).reset_index()
 
+    print(f"[LOG] museq.shape: {museq.shape}")
     snvs = museq.merge(strelka)
+    print(f"[LOG] museq.shape after strelka merge: {museq.shape}")
     snvs = snvs.merge(mappability)
+    print(f"[LOG] museq.shape after mappability merge: {museq.shape}")
     snvs = snvs.merge(cosmic, how='left')
+    print(f"[LOG] museq.shape after cosmic merge: {museq.shape}")
     snvs = snvs.merge(dbsnp, how='left')
+    print(f"[LOG] museq.shape after dbsnp merge: {museq.shape}")
     snvs = snvs.merge(snpeff, how='left')
+    print(f"[LOG] museq.shape after snpeff merge: {museq.shape}")
     snvs = snvs.merge(trinuc, how='left')
+    print(f"[LOG] museq.shape after trinuc merge: {museq.shape}")
 
     snvs['is_cosmic'] = snvs['is_cosmic'].fillna(False)
     snvs['is_dbsnp'] = snvs['is_dbsnp'].fillna(False)
 
     snvs = snvs[~snvs['is_dbsnp']]
+    print(f"[LOG] museq.shape after is_dbsnp filtering: {museq.shape}")
 
     snvs = filter_blacklist(snvs, blacklist)
     snvs.drop_duplicates(inplace=True)
+    print(f"[LOG] museq.shape after drop_duplicates filtering: {museq.shape}")
 
     return snvs
 
@@ -136,8 +151,8 @@ if __name__ == '__main__':
         snpeff = pd.read_csv(argv.snpeff, dtype={'chrom': str})
         trinuc = pd.read_csv(argv.trinuc, dtype={'chrom': str})
         blacklist = pd.read_csv(
-            argv.blacklist, sep='\t', header=None,
-            names=['chr', 'start', 'end', 'desc']
+            argv.blacklist, sep='\t', skiprows=1,
+            names=['chr', 'start', 'end', 'width', 'desc']
         )
 
         snvs = filter_snvs(
