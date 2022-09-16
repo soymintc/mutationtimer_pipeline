@@ -33,6 +33,7 @@ cmd="$cmd --cluster \"${CLUSTER_CMD}\""
 cmd="$cmd --cluster-cancel bkill"
 cmd="$cmd --snakefile dlp.smk"
 cmd="$cmd --rerun-incomplete" #--dry-run" #--dag
+#cmd="$cmd --rerun-incomplete --dry-run" #--dag
 
 echo $cmd
 eval $cmd
