@@ -31,7 +31,7 @@ cmd="$cmd --skip-script-cleanup"
 cmd="$cmd --cluster-config $cluster_yaml"
 cmd="$cmd --cluster \"${CLUSTER_CMD}\""
 cmd="$cmd --cluster-cancel bkill"
-cmd="$cmd --rerun-incomplete" #--dry-run" #--dag
+cmd="$cmd --rerun-incomplete --dry-run" #--dag
 
 echo $cmd
 eval $cmd
