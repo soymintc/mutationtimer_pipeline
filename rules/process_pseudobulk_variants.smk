@@ -16,11 +16,10 @@ def _get_scdna_variantcalling(wildcards):
     paths = paths[(paths["sample_category"] == "TUMOR")]
     paths.set_index(['isabl_sample_id', 'result_type'], inplace=True)
 
-    result_types = ['snv_museq', 'snv_strelka', 'snv_mappability',
+    result_types = ['museq', 'snv_museq', 'snv_strelka', 'snv_mappability',
         'snv_cosmic_status', 'snv_dbsnp_status', 'snv_snpeff', 'snv_trinuc']
     dlp_paths = {result_type: _retrieve_path(paths, wildcards.sample, result_type)
         for result_type in result_types}
-    print(dlp_paths)
     return dlp_paths
 
 rule filter_pseudobulk_snv:
@@ -36,7 +35,8 @@ rule filter_pseudobulk_snv:
         "docker://soymintc/clickpdvcf:latest"
     shell:
         'python scripts/filter_pseudobulk_snvs.py '
-        '{input.snv_museq} ' 
+        '{input.museq} ' # museq vcf
+        '{input.snv_museq} ' # museq csv 
         '{input.snv_strelka} ' 
         '{input.snv_mappability} ' 
         '{input.snv_cosmic_status} ' 
