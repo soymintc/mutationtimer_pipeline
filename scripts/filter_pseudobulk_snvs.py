@@ -223,4 +223,4 @@ if __name__ == '__main__':
         snvs = snvs.join(vcfdata)
         print(f"[LOG:{time.ctime()}] filter_snvs complete")
 
-    snvs.to_csv(argv.snvs, sep='\t', index=False)
+    snvs.to_csv(argv.snvs, sep='\t')
