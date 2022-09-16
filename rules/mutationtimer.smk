@@ -1,3 +1,5 @@
+import os
+import yaml
 import pandas as pd
 
 def extract_purity(aliquot_id, annot):
@@ -14,18 +16,16 @@ def extract_purity(aliquot_id, annot):
     purity = 0.5 if purity == 'NA' else purity # ad hoc replacement to 0.5 if NA
     return purity
 
-def extract_ploidy(aliquot_id, annot):
-    assert 'tumor_aliquot_id' in annot.columns
-    assert 'ploidy' in annot.columns
-    aliquot_and_ploidy = annot[['tumor_aliquot_id', 'ploidy']].fillna('NA')
-    aliquot_and_ploidy = aliquot_and_ploidy.sort_values(
-        by=['ploidy', 'tumor_aliquot_id'],
-        ascending=False) # if duplicate aliquots with both ploidy and NA, use ploidy values instead of NA
-    aliquot_to_ploidy = {x[0]: x[1] for x in aliquot_and_ploidy.values}
-    ploidy = 'NA'
-    if aliquot_id in aliquot_to_ploidy:
-        ploidy = aliquot_to_ploidy[aliquot_id]
-    ploidy = 2 if ploidy == 'NA' else ploidy # ad hoc replacement to 2 if NA
+def extract_ploidy(aliquot_id):
+    remixtpp_path = '/juno/work/shah/users/chois7/tables/all.WGS-REMIXT-POSTPROCESS.tsv'
+    assert os.path.exists(remixtpp_path)
+    remixtpp = pd.read_table(remixtpp_path)
+    meta = remixtpp[remixtpp['result_type']=='meta']
+    meta = meta[meta['isabl_aliquot_id'] == aliquot_id]['result_filepath'].values
+    assert len(meta) == 1
+    assert os.path.exists(meta[0])
+    meta = yaml.load(open(meta[0], 'r').read(), Loader=yaml.Loader)
+    ploidy = meta['ploidy']
     return ploidy
 
 rule parse_purity_and_ploidy:
@@ -49,7 +49,7 @@ rule parse_purity_and_ploidy:
 
         # get ploidy
         print("No problem before extract_ploidy")
-        ploidy = extract_ploidy(wildcards.aliquot_id, annot)
+        ploidy = extract_ploidy(wildcards.aliquot_id)
 
         with open(output[0], 'w') as outfile:
             outfile.write(f'{purity},{ploidy}\n')
