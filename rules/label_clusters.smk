@@ -56,8 +56,8 @@ rule label_clusters:
         os.path.join(config['results_dir'], '{sample}.labelled.tsv')
     log:
         os.path.join(config['log_dir'], '{sample}.labelled.tsv.log')
-    #singularity:
-    #    "docker://soymintc/dask"
+    singularity:
+        "docker://soymintc/dask"
     shell:
         'python scripts/label_clusters.py '
         '--counts {input.counts} '
