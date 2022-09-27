@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 def _retrieve_path(paths, isabl_sample_id, result_type):
-    data_paths = paths.loc[(isabl_sample_id, result_type)]
+    data_paths = paths.loc[[(isabl_sample_id, result_type)]]
     assert data_paths.shape[0] == 1, data_paths
     assert 'result_filepath' in data_paths.columns, data_paths.columns
     path = data_paths['result_filepath'][0]
@@ -23,7 +23,7 @@ def _get_scdna_signals(wildcards):
 
 rule process_single_cell_copy_number:
     input: 
-        unpack(_get_scdna_variantcalling)
+        unpack(_get_scdna_signals)
     output: 
         cna_bins_consensus=os.path.join(config['results_dir'], '{sample}.cna_bins_consensus.tsv'),
         cna_bins_consensus_mutationtimer=os.path.join(config['results_dir'], '{sample}.cna_bins_consensus_mutationtimer.tsv'),
