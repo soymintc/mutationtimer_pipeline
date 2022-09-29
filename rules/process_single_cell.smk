@@ -33,7 +33,7 @@ rule process_single_cell_copy_number:
     singularity: 
         "/juno/work/shah/vazquezi/images/singularity/spectrum_latest.sif"
     shell:
-        'R scripts/proc_copy_number.R '
+        'Rscript scripts/proc_copy_number.R '
         '--hscn {input.rdatafile} ' # Rdata file
         '--cna_bins_consensus {output.cna_bins_consensus} '
         '--cna_bins_consensus_mutationtimer {output.cna_bins_consensus_mutationtimer} '

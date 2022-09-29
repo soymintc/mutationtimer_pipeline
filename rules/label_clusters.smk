@@ -19,7 +19,7 @@ def _get_scdna_genotyping_data(wildcards):
     counts = _retrieve_path(paths, wildcards.sample, 'counts')
     inputs = os.path.join(os.path.split(counts)[0], 'input.yaml')
     clusters = os.path.join(config['results_dir'], '{sample}.signals.clone_id.tsv')
-    variants = os.path.join(config['results_dir'], '{sample}.pseudobulk.tsv')
+    variants = os.path.join(config['results_dir'], '{sample}.pseudobulk_snv.tsv')
     return {
         'counts': counts,
         'inputs': inputs,
@@ -53,9 +53,9 @@ rule label_clusters:
     input:
         unpack(_get_scdna_genotyping_data)
     output:
-        os.path.join(config['results_dir'], '{sample}.labelled.tsv')
+        os.path.join(config['results_dir'], '{sample}.labelled_snv.tsv')
     log:
-        os.path.join(config['log_dir'], '{sample}.labelled.tsv.log')
+        os.path.join(config['log_dir'], '{sample}.labelled_snv.tsv.log')
     singularity:
         "docker://soymintc/dask"
     shell:
