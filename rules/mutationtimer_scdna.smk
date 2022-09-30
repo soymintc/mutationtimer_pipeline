@@ -15,7 +15,8 @@ rule mutationtimer:
         vcf=os.path.join(config['results_dir'], '{aliquot_id}.vcf'),
         cn=os.path.join(config['results_dir'], '{sample}.cna_bins_consensus_mutationtimer.tsv'),
         purity_and_ploidy=os.path.join(config['results_dir'], 
-                                       '{aliquot_id}.purity,ploidy.txt')
+                                       '{aliquot_id}.purity,ploidy.txt'),
+        clusters=(os.path.join(config['results_dir'], '{aliquot_id}.clusters.tsv')),
     output:
         pdf=os.path.join(config['results_dir'], '{aliquot_id}.pdf'),
         rdata=os.path.join(config['results_dir'], '{aliquot_id}.RData')

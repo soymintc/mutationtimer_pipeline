@@ -21,7 +21,7 @@ def get_args():
 
 def get_clone_id(clusters):
     # get clusters
-    clone_id = pd.read_csv(clusters)
+    clone_id = pd.read_table(clusters)
     clone_id = clone_id.set_index('cell_id')
     return clone_id
 
@@ -50,6 +50,7 @@ def proc_snvgenotyping(gt_path): # SCDNA-SNVGENOTYPING counts file
                                      'ref':str, 'alt':str,
                                      'ref_counts':'int16', 'alt_counts':'int16'})
     gt = gt[INDEX + ['ref_counts', 'alt_counts', 'cell_id']]
+    gt = gt.loc[gt['alt_counts'] > 0, :]
     return gt
 
 def map_cluster_to_variants(gt, snv, out_tsv_path):

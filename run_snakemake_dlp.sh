@@ -34,6 +34,7 @@ cmd="$cmd --cluster-cancel bkill"
 cmd="$cmd --snakefile dlp.smk"
 cmd="$cmd --rerun-incomplete" 
 #cmd="$cmd --dry-run"
+#cmd="$cmd --dag | dot -Tsvg > dlp.svg"
 
 echo $cmd
 eval $cmd
