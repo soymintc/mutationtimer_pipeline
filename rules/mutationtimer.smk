@@ -76,6 +76,8 @@ rule mutationtimer:
         ploidy = lambda wildcards, input: get_ploidy(input.purity_and_ploidy)
     log:
         os.path.join(config['log_dir'], '{aliquot_id}.pdf.log')
+    resources:
+        mem_mb = 4096
     singularity: 
         "docker://soymintc/mutationtimer:latest"
     shell:

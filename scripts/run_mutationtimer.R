@@ -32,6 +32,8 @@ get_args <- function() {
 
     p$add_argument("vcf", help = "vcf including t_ref_count and t_alt_count")
     p$add_argument("cn", help = "CN tsv file with columns: chromosome, start, end, major_1, minor_1")
+    p$add_argument("clusters", help = "clusters tsv file as in MutationTimeR docs")
+
     p$add_argument("cf", help = "Clonal frequency (purity)")
     p$add_argument("ploidy", help = "Ploidy")
 
@@ -47,6 +49,11 @@ main <- function() {
 
     vcf <- readVcf(argv$vcf) # vcf path
     clonal_freq <- as.numeric(argv$cf) # purity
+    
+    clusters = NULL
+    if (argv$clusters != 'NA')
+        clusters <- read.table(argv$clusters, header=T) # clusters
+
     ploidy <- as.numeric(argv$ploidy) # ploidy
     print("[LOG] ploidy") 
     print(ploidy)
@@ -61,7 +68,8 @@ main <- function() {
     print(isWgd)
 
     # run MutationTimeR functions
-    mt <- mutationTime(vcf, bb, isWgd=isWgd, n.boot=10) # TODO: add cluster
+    mt <- mutationTime(vcf, bb, clusters=clusters,
+                       isWgd=isWgd, n.boot=10) # TODO: add cluster
     vcf <- addMutTime(vcf, mt$V)
     mcols(bb) <- cbind(mcols(bb), mt$T)
     

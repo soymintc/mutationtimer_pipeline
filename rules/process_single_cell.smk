@@ -39,3 +39,18 @@ rule process_single_cell_copy_number:
         '--cna_bins_consensus_mutationtimer {output.cna_bins_consensus_mutationtimer} '
         '--purity_ploidy {output.purity_ploidy} '
         '&> {log}'
+
+rule proc_signals_cna_for_mt:
+    input:
+        os.path.join(config['results_dir'], '{sample}.cna_bins_consensus_mutationtimer.tsv'),
+    output:
+        os.path.join(config['results_dir'], '{sample}.cn.tsv'),
+    log:
+        os.path.join(config['log_dir'], '{sample}.cn.tsv.log'),
+    singularity: 
+        "docker://soymintc/clickpdvcf:0.0.2"
+    shell:
+        'python scripts/proc_signals_cna_for_mt.py '
+        '--in_cna {input} --out_cn {output} '
+        '&> {log}'
+

@@ -66,3 +66,27 @@ rule label_clusters:
         '--variants {input.variants} '
         '--output {output} '
         '&> {log}'
+
+rule count_clusters_and_make_vcf: # make "clusters" input for MutationTimeR
+    input:
+        filtered = os.path.join(config['results_dir'], '{sample}.pseudobulk_snv.tsv'),
+        labelled = os.path.join(config['results_dir'], '{sample}.labelled_snv.tsv'),
+        purityploidy = os.path.join(config['results_dir'], '{sample}.purity_ploidy.csv'),
+    output:
+        clusters = os.path.join(config['results_dir'], '{sample}.clusters.tsv'),
+        vcf = os.path.join(config['results_dir'], '{sample}.vcf'),
+    params:
+        vcf_header = '/juno/work/shah/users/chois7/retreat/mttest/data/header.vcf',
+    log:
+        os.path.join(config['log_dir'], '{sample}.count_clusters_and_make_vcf.log'),
+    singularity:
+        "docker://soymintc/clickpdvcf"
+    shell:
+        'python scripts/make_clusters_and_vcf.py '
+        '--filtered {input.filtered} '
+        '--labelled {input.labelled} '
+        '--purityploidy {input.purityploidy} '
+        '--vcf_header {params.vcf_header} '
+        '--out_clusters {output.clusters} '
+        '--out_vcf {output.vcf} '
+        '&> {log}'
