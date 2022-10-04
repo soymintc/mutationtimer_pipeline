@@ -45,30 +45,42 @@ def map_cell_to_clone(inputs, clone_id):
         cell_to_clone[normal_cell_id] = '0'
     return cell_to_clone
 
-def proc_snvgenotyping(gt_path): # SCDNA-SNVGENOTYPING counts file
+def map_cluster_to_snvgenotyping(gt_path): # SCDNA-SNVGENOTYPING counts file
     gt = dd.read_csv(gt_path, dtype={'chrom':str, 'cell_id':str, 'coord':'int32',
                                      'ref':str, 'alt':str,
                                      'ref_counts':'int16', 'alt_counts':'int16'})
-    gt = gt[INDEX + ['ref_counts', 'alt_counts', 'cell_id']]
-    gt = gt.loc[gt['alt_counts'] > 0, :]
-    return gt
+    gt['cluster'] = gt['cell_id'].map(cell_to_clone)
+    gt['cluster'] = gt['cluster'].dropna()
 
-def map_cluster_to_variants(gt, snv, out_tsv_path):
+    tumor_gt = gt.loc[gt['cluster'] != '0']
+    normal_gt = gt.loc[gt['cluster'] == '0']
+
+    tumor_groups = tumor_gt.groupby(['cluster', 'chrom', 'coord', 'ref', 'alt'])
+    tumor_df = tumor_groups[['ref_counts', 'alt_counts']].sum()
+    tumor_df = tumor_df.reset_index().compute()
+    tumor_df = tumor_df.set_index(INDEX)
+
+    normal_groups = normal_gt.groupby(['cluster', 'chrom', 'coord', 'ref', 'alt'])
+    normal_df = normal_groups[['ref_counts', 'alt_counts']].sum()
+    normal_df = normal_df.reset_index().compute()
+    normal_df = normal_df.set_index(INDEX)
+
+    tumor_df = tumor_df[tumor_df['alt_counts'] > 0]
+    normal_df = normal_df[normal_df['alt_counts'] > 0]
+
+    tumor_clust = tumor_df.groupby(INDEX)[['ref_counts', 'alt_counts']].sum()
+    tumor_clust['cluster'] = tumor_df.groupby(INDEX)['cluster'].apply(lambda x: ','.join(x))
+    normal_clust = normal_df.groupby(INDEX)[['ref_counts', 'alt_counts']].sum()
+    normal_clust['cluster'] = normal_df.groupby(INDEX)['cluster'].apply(lambda x: ','.join(x))
+    somatic_clust = tumor_clust[~(tumor_clust.index.isin(normal_clust.index))]
+
+    return somatic_clust
+
+def label_variantcalling_with_cluster(somatic_clust, snv, out_tsv_path):
     # join gt to snv, map cluster id to cell id
-    joint = snv.merge(gt, left_on=INDEX, right_on=INDEX, how="inner")
-    joint = joint.compute() # dask -> pandas
-    joint['cluster'] = joint['cell_id'].map(cell_to_clone).fillna('NA')
+    snv = snv[INDEX].set_index(INDEX)
+    labelled = snv.join(somatic_clust).dropna()
 
-    clust_info = joint[INDEX + ['cell_id', 'cluster']]
-    cell_ids = clust_info.groupby(INDEX)['cell_id'].apply(lambda x: ','.join(x))
-    clusters = clust_info.groupby(INDEX)['cluster'].apply(lambda x: ','.join(x))
-
-    labelled = (clust_info[INDEX]
-            .drop_duplicates()
-            .merge(cell_ids, on=INDEX)
-            .merge(clusters, on=INDEX))
-
-    labelled.to_csv(out_tsv_path, sep='\t', index=False)
     return labelled
 
 if __name__ == "__main__":
@@ -81,7 +93,7 @@ if __name__ == "__main__":
     cell_to_clone = map_cell_to_clone(args.inputs, clone_id)
 
     # process SCDNA-SNVGENOTYPING file
-    gt = proc_snvgenotyping(args.counts)
+    somatic_clust = map_cluster_to_snvgenotyping(args.counts)
 
     # process filtered snv (from SCDNA-VARIANTCALLING proc pipeline)
     snv_path = args.variants
@@ -89,4 +101,5 @@ if __name__ == "__main__":
             dtype={'chrom':str, 'coord':'int32', 'ref':str, 'alt':str})
 
     # join gt to snv, map cluster id to cell id
-    labelled = map_cluster_to_variants(gt, snv, args.output)
+    labelled = label_variantcalling_with_cluster(somatic_clust, snv, args.output)
+    labelled.to_csv(out_tsv_path, sep='\t', index=False)

@@ -1,6 +1,3 @@
-import os 
-import pandas as pd
-
 class RunInfo:
     def __init__(self, config):
         self.metadata = pd.read_csv(config['metadata'], sep='\t')
@@ -15,3 +12,4 @@ class RunInfo:
         self.aliquot_ids = list(sorted(self.metadata['isabl_aliquot_id'].unique()))
 
 runinfo = RunInfo(config)
+

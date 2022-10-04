@@ -1,4 +1,3 @@
-
 rule all:
     input:
         os.path.join(config['results_dir'], f'{config["aliquot_id"]}.pdf'),

@@ -1,12 +1,12 @@
+import os 
+import yaml
+import pandas as pd
 
 rule all:
     input:
-        os.path.join(config['results_dir'], f'{config["sample_id"]}.purity_ploidy.csv'),
-        os.path.join(config['results_dir'], f'{config["sample_id"]}.pseudobulk_snv.tsv'),
-        os.path.join(config['results_dir'], f'{config["sample_id"]}.labelled_snv.tsv'),
         os.path.join(config['results_dir'], f'{config["sample_id"]}.pdf'),
 
+include: "rules/common_scdna.smk"
 include: "rules/process_pseudobulk_variants.smk"
-include: "rules/label_clusters.smk"
-include: "rules/process_single_cell.smk"
+include: "rules/process_pseudobulk_cna.smk"
 include: "rules/mutationtimer_scdna.smk"
