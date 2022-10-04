@@ -24,7 +24,7 @@ def get_labelled_table(labelled_table):
     lab = pd.read_table(labelled_table, dtype={'chrom':str}) # labelled
     print(f'[LOG] before filtering: {lab.shape}')
     lab = lab[~(lab['cluster'].str.count('0')>0)] # germline cell filter
-    print(f'[LOG] after removing SNVs with normall cell > 0 count: {lab.shape}')
+    print(f'[LOG] after removing SNVs with normal cell > 0 count: {lab.shape}')
     lab = lab[lab['cluster'].notnull()]
     print(f'[LOG] after removing SNVs with no clusters mapped: {lab.shape}')
     return lab
@@ -94,12 +94,14 @@ if __name__ == '__main__':
     purity, ploidy = get_purity_ploidy(args.purityploidy)
 
     lab = get_labelled_table(args.labelled)
-    
+    lab.set_index(INDEX, inplace=True)
+    print(f'[LOG] lab.head(): \n{lab.head()}')
     clustdf, skip_ixs = count_clusters(lab, purity)
     clustdf.to_csv(args.out_clusters, sep='\t', index=False)
 
-    lab.set_index(INDEX, inplace=True)
+    print(f'[LOG] skip_ixs[:5]: \n{skip_ixs[:5]}')
     lab = lab[~lab.index.isin(skip_ixs)]
+    print(f'[LOG] lab.shape after skip_ixs skip: {lab.shape}')
 
     # make vcf
     flt = pd.read_table(args.filtered, dtype={'chrom':str})
@@ -108,5 +110,6 @@ if __name__ == '__main__':
     flt = flt[cols]
 
     joint = flt.join(lab).dropna()
+    print(f'[LOG] joint.shape after dropna(): {joint.shape}')
     
     write_vcf(joint, args.vcf_header, args.out_vcf)

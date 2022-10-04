@@ -3,7 +3,7 @@ import pandas as pd
 
 def _retrieve_path(paths, isabl_patient_id, result_type):
     data_paths = paths.loc[[(isabl_patient_id, result_type)]]
-    print(data_paths)
+    #print(data_paths)
     assert data_paths.shape[0] == 1, data_paths
     assert 'result_filepath' in data_paths.columns, data_paths.columns
     path = data_paths['result_filepath'][0]
@@ -15,11 +15,11 @@ def _get_scdna_signals(wildcards):
     assert os.path.exists(paths_path)
     paths = pd.read_table(paths_path)
     paths = paths[(paths["sample_category"] == "TUMOR")]
-    paths.set_index(['isabl_patient_id', 'result_type'], inplace=True)
+    paths.set_index(['isabl_sample_id', 'result_type'], inplace=True)
 
     result_types = ['rdatafile']
-    print(paths)
-    dlp_paths = {result_type: _retrieve_path(paths, wildcards.patient, result_type)
+    #print(paths)
+    dlp_paths = {result_type: _retrieve_path(paths, wildcards.sample, result_type)
         for result_type in result_types}
     return dlp_paths
 
@@ -27,11 +27,11 @@ rule process_single_cell_copy_number:
     input: 
         unpack(_get_scdna_signals)
     output: 
-        cna_bins_consensus=os.path.join(config['results_dir'], '{patient}.cna_bins_consensus.tsv'),
-        cna_bins_consensus_mutationtimer=os.path.join(config['results_dir'], '{patient}.cna_bins_consensus_mutationtimer.tsv'),
-        purity_ploidy=os.path.join(config['results_dir'], '{patient}.purity_ploidy.csv')
+        cna_bins_consensus=os.path.join(config['results_dir'], '{sample}.cna_bins_consensus.tsv'),
+        cna_bins_consensus_mutationtimer=os.path.join(config['results_dir'], '{sample}.cna_bins_consensus_mutationtimer.tsv'),
+        purity_ploidy=os.path.join(config['results_dir'], '{sample}.purity_ploidy.csv')
     log:
-        os.path.join(config['log_dir'], '{patient}.single_cell_copy_number.tsv.log')
+        os.path.join(config['log_dir'], '{sample}.single_cell_copy_number.tsv.log')
     singularity: 
         "/juno/work/shah/vazquezi/images/singularity/spectrum_latest.sif"
     shell:
