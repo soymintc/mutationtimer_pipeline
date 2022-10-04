@@ -46,3 +46,46 @@ rule filter_pseudobulk_snv:
         '{params.blacklist} '
         '{output} '
         '&> {log}'
+
+rule filtered_pseudobulk_snv_cell_counts:
+	input:
+        snvs=os.path.join(config['results_dir'], '{sample}.pseudobulk_snv.tsv'),
+		counts=lambda wildcards: runinfo.paths[(wildcards.sample, 'SCDNA-SNVGENOTYPING', 'counts')],
+		cells="{outdir}/{subdir}/sample_merge/{{sample}}/single_cell/filtered.tsv".format(
+			outdir=output_dir,
+			subdir=config['outputs']['out']
+		),
+	output:
+		"{outdir}/{subdir}/filter_variants/{{sample}}/pseudobulk/filtered/snv_counts.tsv".format(
+			outdir=output_dir,
+			subdir=config['outputs']['out']
+		),
+	log:
+		'{outdir}/{subdir}/filtered_pseudobulk_snv_cell_counts/{{sample}}.log'.format(
+			outdir=output_dir,
+			subdir=config['outputs']['log']
+		),
+	run:
+		import numpy as np
+
+		count_dtypes = {
+			'chrom': 'category', 'ref': 'category', 'alt': 'category',
+			'cell_id': 'category', 'sample_id': 'category',
+			'library_id': 'category'
+		}
+		counts = pd.read_csv(input['counts'], dtype=count_dtypes)
+
+		retained_cells = np.loadtxt(input['cells'], dtype=str)
+		counts = counts[counts['cell_id'].isin(retained_cells)]
+		counts = counts[counts['alt_counts'] > 0]
+		counts = counts.copy()
+
+		snv_dtypes = {
+			'chrom': 'category', 'ref': 'category', 'alt': 'category',
+			'tri_nucleotide_context': 'category'
+		}
+		snvs = pd.read_csv(input['snvs'], sep='\t', dtype=snv_dtypes)
+
+		snvs = snvs.merge(counts)
+		snvs.drop_duplicates(inplace=True)
+		snvs.to_csv(output[0], sep='\t', index=False)
