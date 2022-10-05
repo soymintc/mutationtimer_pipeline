@@ -46,37 +46,46 @@ def map_cell_to_clone(inputs, clone_id):
     return cell_to_clone
 
 def map_cluster_to_snvgenotyping(gt_path): # SCDNA-SNVGENOTYPING counts file
+    # use dask dd to save mem in downstream operations
     gt = dd.read_csv(gt_path, dtype={'chrom':str, 'cell_id':str, 'coord':'int32',
                                      'ref':str, 'alt':str,
                                      'ref_counts':'int16', 'alt_counts':'int16'})
-    gt['cluster'] = gt['cell_id'].map(cell_to_clone)
-    gt['cluster'] = gt['cluster'].dropna()
 
+    # map cluster info
+    gt = gt[['chrom', 'coord', 'ref', 'alt', 'ref_counts', 'alt_counts', 'cell_id']] # req cols to save memory
+    gt['cluster'] = gt['cell_id'].map(cell_to_clone) # SPECTRUM... -> C
+    gt['cluster'] = gt['cluster'].dropna() # remove NA clusters
+
+    # divide tumor and normal tables
     tumor_gt = gt.loc[gt['cluster'] != '0']
     normal_gt = gt.loc[gt['cluster'] == '0']
 
-    tumor_groups = tumor_gt.groupby(['cluster', 'chrom', 'coord', 'ref', 'alt'])
+    tumor_groups = tumor_gt.groupby(['chrom', 'coord', 'ref', 'alt', 'cluster']) # aggregate counts per-cluster level
     tumor_df = tumor_groups[['ref_counts', 'alt_counts']].sum()
-    tumor_df = tumor_df.reset_index().compute()
-    tumor_df = tumor_df.set_index(INDEX)
+    tumor_df = tumor_df[tumor_df['alt_counts'] > 0] # remove aggregate alt count 0
+    tumor_df = tumor_df.reset_index()
 
-    normal_groups = normal_gt.groupby(['cluster', 'chrom', 'coord', 'ref', 'alt'])
+    normal_groups = normal_gt.groupby(['chrom', 'coord', 'ref', 'alt', 'cluster'])
     normal_df = normal_groups[['ref_counts', 'alt_counts']].sum()
-    normal_df = normal_df.reset_index().compute()
-    normal_df = normal_df.set_index(INDEX)
+    normal_df = normal_df[normal_df['alt_counts'] > 0] # remove aggregate alt count 0
+    normal_df = normal_df.reset_index()
 
-    tumor_df = tumor_df[tumor_df['alt_counts'] > 0]
-    normal_df = normal_df[normal_df['alt_counts'] > 0]
-
+    # aggregate counts pan-cluster level
     tumor_clust = tumor_df.groupby(INDEX)[['ref_counts', 'alt_counts']].sum()
     tumor_clust['cluster'] = tumor_df.groupby(INDEX)['cluster'].apply(lambda x: ','.join(x))
     normal_clust = normal_df.groupby(INDEX)[['ref_counts', 'alt_counts']].sum()
     normal_clust['cluster'] = normal_df.groupby(INDEX)['cluster'].apply(lambda x: ','.join(x))
-    somatic_clust = tumor_clust[~(tumor_clust.index.isin(normal_clust.index))]
+
+    # compute coordinates
+    tumor_ixs = tumor_clust.index.compute() # dask -> pandas
+    normal_ixs = normal_clust.index.compute() # dask -> pandas
+
+    # remove potential germline
+    somatic_clust = tumor_clust.compute()[~(tumor_ixs.isin(normal_ixs))]
 
     return somatic_clust
 
-def label_variantcalling_with_cluster(somatic_clust, snv, out_tsv_path):
+def label_variantcalling_with_cluster(somatic_clust, snv):
     # join gt to snv, map cluster id to cell id
     snv = snv[INDEX].set_index(INDEX)
     labelled = snv.join(somatic_clust).dropna()
@@ -97,9 +106,9 @@ if __name__ == "__main__":
 
     # process filtered snv (from SCDNA-VARIANTCALLING proc pipeline)
     snv_path = args.variants
-    snv = dd.read_csv(snv_path, sep='\t', 
+    snv = pd.read_csv(snv_path, sep='\t', 
             dtype={'chrom':str, 'coord':'int32', 'ref':str, 'alt':str})
 
     # join gt to snv, map cluster id to cell id
-    labelled = label_variantcalling_with_cluster(somatic_clust, snv, args.output)
-    labelled.to_csv(out_tsv_path, sep='\t', index=False)
+    labelled = label_variantcalling_with_cluster(somatic_clust, snv)
+    labelled.to_csv(args.output, sep='\t', index=True)

@@ -12,6 +12,7 @@ def update_blocks_and_reset_prev(blocks, prev, row,
 
 def get_blocks_from_signals_cna(in_cna):
     #in_cna = '/juno/work/shah/isabl_data_lake/analyses/37/74/23774/SPECTRUM-OV-081_S1_LEFT_OVARY_cn.csv'
+    merge_gap = 1000000
     dtype = {'chromosome':str, 'start':int, 'end':int, 'major_1': float, 'minor_1': float}
     cna = pd.read_table(in_cna, dtype=dtype, low_memory=False)
     
@@ -35,7 +36,7 @@ def get_blocks_from_signals_cna(in_cna):
         if (prev['major_1'] != row['major_1']) or (prev['minor_1'] != row['minor_1']):
             blocks, prev = update_blocks_and_reset_prev(blocks, prev, row)
             continue
-        if prev['end'] != row['start']:
+        if abs(prev['end'] - row['start']) > merge_gap:
             blocks, prev = update_blocks_and_reset_prev(blocks, prev, row)
             continue
         # update prev block

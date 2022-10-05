@@ -85,8 +85,9 @@ if __name__ == '__main__':
     purity, ploidy = get_purity_ploidy(args.purityploidy)
 
     lab = get_labelled_table(args.labelled)
+    print(f'[LOG] lab.head() before set_index: \n{lab.head()}')
     lab.set_index(INDEX, inplace=True)
-    print(f'[LOG] lab.head(): \n{lab.head()}')
+    print(f'[LOG] lab.head() after set_index: \n{lab.head()}')
     clustdf = count_clusters(lab, purity)
     clustdf.to_csv(args.out_clusters, sep='\t', index=False)
     

@@ -45,6 +45,8 @@ rule label_clusters:
         os.path.join(config['log_dir'], '{sample}.labelled_snv.tsv.log')
     singularity:
         "docker://soymintc/dask"
+    resources:
+        mem_mb = 36000
     shell:
         'python scripts/label_clusters.py '
         '--counts {input.counts} '
