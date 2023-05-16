@@ -21,7 +21,7 @@ bash run_snakemake.sh $out_dir $aliquot_id
 
 ## Input data description for MutationTimeR
 You would want to customize however you want to preprocess data for MutationTimerR. Here's a description of how the input should be formatted for this case.<br>
-Rule `mutationtimer` in `mutationtimer_scdna.smk` takes four inputs: `vcf`, `cn`, `purity_and_ploidy`, and `clusters` files.
+Script `scripts/run_mutationtimer.R` takes four inputs: `vcf`, `cn`, `purity_and_ploidy`, and `clusters` files. `vcf` is advides to end in `.vcf` (not `.vcf.gz`), `cn` in `.cn.tsv`, `purity_and_ploidy` in `.csv`, and `clusters` in `.tsv`.
 
 ### `vcf` format
 First of all, the vcf input should only include SNVs. It should also have only one genotype column, e.g. `TUMOR` as below. Here's an example visidata block of the `vcf` input:
